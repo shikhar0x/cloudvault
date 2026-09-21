@@ -16,11 +16,50 @@ CloudVault allows authenticated users to upload, organize, download, delete, and
 
 # 2. Current Project Status
 
-Status: **Planning / Architecture Definition**
+Status: **Implementation in progress**
 
 No production implementation should be assumed to exist unless verified directly in the current repository.
 
 The repository structure, requirements, architecture, rules, and development phases are being established before implementation.
+
+## Member 3 status (Authentication + Database + Sharing)
+
+Last verified: 2026-09-21 (test suite: 107 passed — see `backend/tests/`).
+
+```text
+DATABASE            IMPLEMENTED + VERIFIED
+├── PostgreSQL connection (backend/app/database/session.py)   VERIFIED
+├── SQLAlchemy 2.x models (users/folders/files/share_links)   VERIFIED
+├── Alembic migrations (database/migrations, revision 46d1a57b07cf)  VERIFIED
+├── dev seeds (database/seeds/seed.py)                        VERIFIED
+└── composite FK prevents cross-user parent folders           VERIFIED
+
+AUTHENTICATION       IMPLEMENTED + VERIFIED
+├── POST /api/auth/register (Argon2id, 409 on duplicate)      VERIFIED
+├── POST /api/auth/login (anti-enumeration timing)            VERIFIED
+├── GET /api/auth/me (JWT-protected)                          VERIFIED
+├── JWT HS256 w/ exp+sub required, alg pinned                 VERIFIED
+└── get_current_user dependency (core/dependencies.py)        VERIFIED
+
+AUTHORIZATION        IMPLEMENTED + VERIFIED
+├── ensure_resource_owner helper (403 convention)             VERIFIED
+└── JWT identity never overridable by request body            VERIFIED
+
+SHARING              IMPLEMENTED + VERIFIED
+├── POST /api/shares (ownership-checked, secure token)        VERIFIED
+├── GET /api/shares/{token} (public, safe fields only)        VERIFIED
+├── GET /api/shares/{token}/download (storage boundary)       VERIFIED*
+├── expiry: 1h/1d/7d, server-side, 410 Gone when expired      VERIFIED
+└── share_links.file_id ON DELETE CASCADE (no stale links)    VERIFIED
+
+* Download endpoint validates token/expiry and delegates to Member 1's
+  storage provider; returns 501 until app/infrastructure/storage exists
+  (expected integration point, not a Member 3 gap).
+
+NOT IMPLEMENTED (other members, intentionally untouched):
+- files/folders/storage modules and S3 (Member 1)
+- frontend (Member 2)
+```
 
 ---
 
