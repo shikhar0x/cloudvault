@@ -1,0 +1,31 @@
+# CloudVault — local development services.
+#
+# Usage (from the repository root):
+#   docker compose up -d postgres
+#
+# Credentials default to the .env.example values (development only — never
+# use these defaults in production; override POSTGRES_PASSWORD / DATABASE_URL
+# in your local .env).
+
+services:
+  postgres:
+    image: postgres:16
+    container_name: cloudvault-postgres
+    environment:
+      POSTGRES_USER: cloudvault
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change_me}
+      POSTGRES_DB: cloudvault
+    ports:
+      - "5432:5432"
+    volumes:
+      - cloudvault-pgdata:/var/lib/postgresql/data
+      # Creates the dedicated test database on first start.
+      - ./database/docker/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U cloudvault -d cloudvault"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  cloudvault-pgdata:
