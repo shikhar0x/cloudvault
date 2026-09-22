@@ -1,16 +1,35 @@
+# CloudVault — local development services.
+#
+# Usage:
+#   docker compose up -d postgres
+#
+# PostgreSQL is exposed on host port 5433 because the host may already
+# have PostgreSQL listening on port 5432.
+
 services:
   postgres:
     image: postgres:16-alpine
     container_name: cloudvault-postgres
     restart: unless-stopped
+
     environment:
       POSTGRES_DB: cloudvault
       POSTGRES_USER: cloudvault
-      POSTGRES_PASSWORD: change_me
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change_me}
+
     ports:
       - "5433:5432"
+
     volumes:
       - cloudvault_postgres_data:/var/lib/postgresql/data
+      - ./database/docker/init:/docker-entrypoint-initdb.d:ro
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U cloudvault -d cloudvault"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
 
 volumes:
   cloudvault_postgres_data:
