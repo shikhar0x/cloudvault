@@ -1,0 +1,16 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: cloudvault-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: cloudvault
+      POSTGRES_USER: cloudvault
+      POSTGRES_PASSWORD: change_me
+    ports:
+      - "5433:5432"
+    volumes:
+      - cloudvault_postgres_data:/var/lib/postgresql/data
+
+volumes:
+  cloudvault_postgres_data:

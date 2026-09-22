@@ -1,13 +1,18 @@
 from functools import lru_cache
+from pathlib import Path
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+
+BACKEND_DIR = Path(__file__).resolve().parents[2]
+PROJECT_ROOT = BACKEND_DIR.parent
 
 
 class Settings(BaseSettings):
     app_name: str = "CloudVault"
     app_env: str = "development"
 
-    backend_host: str = "0.0.0.0"
+    backend_host: str = "127.0.0.1"
     backend_port: int = 8000
 
     database_url: str
@@ -26,7 +31,7 @@ class Settings(BaseSettings):
     frontend_url: str = "http://localhost:3000"
 
     model_config = SettingsConfigDict(
-        env_file="../.env",
+        env_file=PROJECT_ROOT / ".env",
         env_file_encoding="utf-8",
         extra="ignore",
     )

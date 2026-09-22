@@ -1,14 +1,14 @@
 from fastapi import APIRouter
 
 router = APIRouter(
-    prefix="/api/files",
-    tags=["Files"],
+    prefix="/api/storage",
+    tags=["Storage"],
 )
 
 
 @router.get("/health")
-def files_health() -> dict[str, str]:
+def storage_health() -> dict[str, str]:
     return {
-        "module": "files",
+        "module": "storage",
         "status": "ok",
     }
