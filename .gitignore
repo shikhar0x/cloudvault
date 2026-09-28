@@ -52,6 +52,7 @@ coverage/
 *.sqlite
 *.sqlite3
 backend/storage/
+storage/
 uploads/
 
 # AWS / Terraform state
