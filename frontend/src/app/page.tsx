@@ -40,6 +40,7 @@ type SortOption = 'date' | 'name' | 'size';
 
 export default function DashboardPage() {
   const router = useRouter();
+  const [mounted, setMounted] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const [folders, setFolders] = useState<FolderItem[]>([]);
   const [files, setFiles] = useState<FileItem[]>([]);
@@ -92,6 +93,10 @@ export default function DashboardPage() {
     setToastMessage(text);
     setTimeout(() => setToastMessage(null), 3000);
   };
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Keyboard Shortcuts Listener
   useEffect(() => {
@@ -410,6 +415,26 @@ export default function DashboardPage() {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
   };
 
+  const formatDate = (iso: string) => {
+    if (!iso) return '';
+    try {
+      const d = new Date(iso);
+      return d.toISOString().split('T')[0];
+    } catch {
+      return iso;
+    }
+  };
+
+  const formatDateTime = (iso: string) => {
+    if (!iso) return '';
+    try {
+      const d = new Date(iso);
+      return d.toISOString().replace('T', ' ').substring(0, 16);
+    } catch {
+      return iso;
+    }
+  };
+
   const getFileCategory = (mime: string, name: string): CategoryFilter => {
     const ext = name.split('.').pop()?.toLowerCase() || '';
     if (['jpg', 'jpeg', 'png', 'svg', 'webp', 'mp4', 'mkv', 'mov', 'mp3', 'wav'].includes(ext) || mime.includes('image') || mime.includes('video') || mime.includes('audio')) {
@@ -467,6 +492,41 @@ export default function DashboardPage() {
   );
 
   const currentFolderDisplayName = folderPath[folderPath.length - 1]?.name || 'My Drive';
+
+  if (!mounted) {
+    return (
+      <div className="min-h-screen bg-[#09090b] text-[#fafafa] flex flex-col p-3 sm:p-4 gap-3 relative animate-pulse" suppressHydrationWarning>
+        {/* Header Skeleton */}
+        <header className="surface-panel h-14 px-4 flex items-center justify-between">
+          <div className="flex items-center space-x-3">
+            <div className="w-8 h-8 rounded-lg bg-zinc-800 border border-zinc-700 flex items-center justify-center">
+              <div className="w-4 h-4 rounded bg-zinc-700" />
+            </div>
+            <span className="font-semibold text-sm tracking-tight text-white">CloudVault</span>
+          </div>
+          <div className="w-64 h-8 bg-zinc-800/80 rounded-md hidden md:block" />
+          <div className="w-24 h-8 bg-zinc-800/80 rounded-md" />
+        </header>
+
+        {/* Content Skeleton */}
+        <div className="flex-1 flex flex-col md:flex-row gap-3">
+          <aside className="w-full md:w-60 surface-panel p-3.5 space-y-4">
+            <div className="h-8 bg-zinc-800 rounded-md" />
+            <div className="h-8 bg-zinc-800/60 rounded-md" />
+            <div className="h-36 bg-zinc-800/40 rounded-md mt-6" />
+          </aside>
+          <main className="flex-1 surface-panel p-4 flex flex-col gap-4">
+            <div className="h-9 bg-zinc-800/60 rounded-md" />
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              {[...Array(8)].map((_, i) => (
+                <div key={i} className="h-28 bg-zinc-800/30 rounded-lg border border-zinc-800/60" />
+              ))}
+            </div>
+          </main>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#09090b] text-[#fafafa] flex flex-col p-3 sm:p-4 gap-3 relative">
@@ -899,7 +959,7 @@ export default function DashboardPage() {
                       </h4>
                       <div className="mt-1 flex items-center justify-between text-[10px] text-zinc-500">
                         <span>{formatSize(file.file_size)}</span>
-                        <span>{new Date(file.created_at).toLocaleDateString()}</span>
+                        <span suppressHydrationWarning>{formatDate(file.created_at)}</span>
                       </div>
                     </div>
                   </div>
@@ -932,8 +992,8 @@ export default function DashboardPage() {
                         </td>
                         <td className="py-2.5 px-3 text-zinc-400 font-mono text-[11px]">{formatSize(file.file_size)}</td>
                         <td className="py-2.5 px-3 text-zinc-400 truncate max-w-[120px]">{file.mime_type}</td>
-                        <td className="py-2.5 px-3 text-zinc-400">
-                          {new Date(file.created_at).toLocaleDateString()}
+                        <td className="py-2.5 px-3 text-zinc-400" suppressHydrationWarning>
+                          {formatDate(file.created_at)}
                         </td>
                         <td className="py-2.5 px-3.5 text-right" onClick={(e) => e.stopPropagation()}>
                           <div className="flex items-center justify-end space-x-1">

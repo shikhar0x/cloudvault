@@ -54,6 +54,12 @@ export default function PublicSharePage() {
     fetchShare();
   }, [token]);
 
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   const formatSize = (bytes: number) => {
     if (!bytes || bytes === 0) return '0 B';
     const k = 1024;
@@ -63,9 +69,11 @@ export default function PublicSharePage() {
   };
 
   const formatExpiresAt = (iso: string) => {
+    if (!iso) return '';
     try {
-      const date = new Date(iso);
-      return date.toLocaleString();
+      const d = new Date(iso);
+      if (isNaN(d.getTime())) return iso;
+      return d.toISOString().replace('T', ' ').substring(0, 19) + ' UTC';
     } catch {
       return iso;
     }
@@ -98,6 +106,23 @@ export default function PublicSharePage() {
     window.location.href = url;
     setTimeout(() => setDownloading(false), 2000);
   };
+
+  if (!mounted) {
+    return (
+      <div className="min-h-screen bg-[#09090b] text-[#fafafa] flex flex-col items-center justify-center p-4" suppressHydrationWarning>
+        <div className="w-full max-w-md surface-panel p-6 rounded-xl border border-[#27272a] space-y-6 shadow-2xl animate-pulse">
+          <div className="flex items-center justify-between border-b border-[#27272a] pb-4">
+            <div className="flex items-center space-x-2.5">
+              <div className="w-8 h-8 rounded-lg bg-zinc-800 border border-zinc-700" />
+              <div className="w-24 h-4 bg-zinc-800 rounded" />
+            </div>
+            <div className="w-16 h-4 bg-zinc-800 rounded" />
+          </div>
+          <div className="h-32 bg-zinc-800/40 rounded-lg" />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#09090b] text-[#fafafa] flex flex-col items-center justify-center p-4">
