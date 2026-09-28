@@ -3,7 +3,7 @@ import { User, AuthResponse, FileItem, FolderItem, ShareResponse, PublicShareRes
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001';
 
 export class ApiClient {
-  private static getToken(): string | null {
+  public static getToken(): string | null {
     if (typeof window === 'undefined') return null;
     return localStorage.getItem('cloudvault_token');
   }
@@ -114,11 +114,7 @@ export class ApiClient {
   // Folders
   static async getFolders(parentId: string | null = null): Promise<FolderItem[]> {
     const query = parentId ? `?parent_id=${encodeURIComponent(parentId)}` : '';
-    try {
-      return await this.request<FolderItem[]>(`/api/folders${query}`);
-    } catch {
-      return [];
-    }
+    return this.request<FolderItem[]>(`/api/folders${query}`);
   }
 
   static async createFolder(name: string, parentId: string | null = null): Promise<FolderItem> {
@@ -137,11 +133,7 @@ export class ApiClient {
   // Files
   static async getFiles(folderId: string | null = null): Promise<FileItem[]> {
     const query = folderId ? `?folder_id=${encodeURIComponent(folderId)}` : '';
-    try {
-      return await this.request<FileItem[]>(`/api/files${query}`);
-    } catch {
-      return [];
-    }
+    return this.request<FileItem[]>(`/api/files${query}`);
   }
 
   static async uploadFile(file: File, folderId: string | null = null): Promise<FileItem> {

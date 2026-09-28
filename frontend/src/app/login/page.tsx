@@ -28,19 +28,20 @@ export default function LoginPage() {
     }
   };
 
-  const handleDemoLogin = async () => {
-    setEmail('demo@cloudvault.dev');
-    setPassword('demopassword123');
+  const handleDemoLogin = async (userEmail = 'alice@demo.cloudvault.local') => {
+    const pass = 'DemoPass123!';
+    setEmail(userEmail);
+    setPassword(pass);
     setLoading(true);
     setError(null);
     try {
-      await ApiClient.login('demo@cloudvault.dev', 'demopassword123');
+      await ApiClient.login(userEmail, pass);
       router.push('/');
     } catch {
       ApiClient.setUser({
         id: 'usr_demo_01',
-        name: 'Demo Student',
-        email: 'demo@cloudvault.dev',
+        name: userEmail.includes('alice') ? 'Alice Cooper' : 'Bob Builder',
+        email: userEmail,
       });
       ApiClient.setToken('mock_jwt_token_demo_mode');
       router.push('/');
@@ -117,13 +118,24 @@ export default function LoginPage() {
           </div>
         </div>
 
-        <button
-          type="button"
-          onClick={handleDemoLogin}
-          className="w-full py-2 px-3 bg-[#18181b] hover:bg-zinc-800 text-zinc-200 border border-[#27272a] font-medium rounded-lg text-xs transition"
-        >
-          Quick Demo Login
-        </button>
+        <div className="space-y-2">
+          <button
+            type="button"
+            onClick={() => handleDemoLogin('alice@demo.cloudvault.local')}
+            className="w-full py-2 px-3 bg-[#18181b] hover:bg-zinc-800 text-zinc-200 border border-[#27272a] font-medium rounded-lg text-xs transition flex items-center justify-between"
+          >
+            <span>Demo: Alice Cooper</span>
+            <span className="text-[10px] text-zinc-500 font-mono">alice@demo...</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => handleDemoLogin('bob@demo.cloudvault.local')}
+            className="w-full py-2 px-3 bg-[#18181b] hover:bg-zinc-800 text-zinc-200 border border-[#27272a] font-medium rounded-lg text-xs transition flex items-center justify-between"
+          >
+            <span>Demo: Bob Builder</span>
+            <span className="text-[10px] text-zinc-500 font-mono">bob@demo...</span>
+          </button>
+        </div>
 
         <p className="text-center text-xs text-zinc-500">
           Don&apos;t have an account?{' '}
