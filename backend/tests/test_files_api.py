@@ -31,10 +31,14 @@ def test_file_upload_download_delete_flow(client: TestClient, db):
     assert len(files_list) == 1
     assert files_list[0]["id"] == file_id
 
-    # 3. Download file
+    # 3. Download file via Authorization header and query param token
     download_res = client.get(f"/api/files/{file_id}/download", headers=headers)
     assert download_res.status_code == 200
     assert download_res.content == file_content
+
+    download_query_res = client.get(f"/api/files/{file_id}/download?token={token}")
+    assert download_query_res.status_code == 200
+    assert download_query_res.content == file_content
 
     # 4. Delete file
     del_res = client.delete(f"/api/files/{file_id}", headers=headers)

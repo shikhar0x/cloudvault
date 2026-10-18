@@ -157,7 +157,32 @@ export class ApiClient {
 
   static getDownloadUrl(fileId: string): string {
     const token = this.getToken();
-    return `${API_BASE}/api/files/${fileId}/download${token ? `?token=${token}` : ''}`;
+    return `${API_BASE}/api/files/${fileId}/download${token ? `?token=${encodeURIComponent(token)}` : ''}`;
+  }
+
+  static async downloadFile(fileId: string, fileName: string): Promise<void> {
+    const token = this.getToken();
+    const url = `${API_BASE}/api/files/${fileId}/download${token ? `?token=${encodeURIComponent(token)}` : ''}`;
+    const headers: Record<string, string> = {};
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+
+    const res = await fetch(url, { headers });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.detail || 'Failed to download file');
+    }
+
+    const blob = await res.blob();
+    const blobUrl = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = blobUrl;
+    link.download = fileName;
+    document.body.appendChild(link);
+    link.click();
+    window.URL.revokeObjectURL(blobUrl);
+    document.body.removeChild(link);
   }
 
   // Sharing

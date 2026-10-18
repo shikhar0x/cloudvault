@@ -387,6 +387,17 @@ export default function DashboardPage() {
     showToast(`Deleted "${folderName}"`);
   };
 
+  const handleDownloadFile = async (e: React.MouseEvent, fileId: string, fileName: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    try {
+      showToast(`Downloading "${fileName}"...`);
+      await ApiClient.downloadFile(fileId, fileName);
+    } catch (err: any) {
+      alert(err.message || 'Download failed');
+    }
+  };
+
   const handleCreateShare = async () => {
     if (!selectedFileForShare) return;
     try {
@@ -981,6 +992,7 @@ export default function DashboardPage() {
                         </button>
                         <a
                           href={ApiClient.getDownloadUrl(file.id)}
+                          onClick={(e) => handleDownloadFile(e, file.id, file.file_name)}
                           download={file.file_name}
                           className="p-1 rounded text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 transition"
                           title="Download"
@@ -1053,6 +1065,7 @@ export default function DashboardPage() {
                             </button>
                             <a
                               href={ApiClient.getDownloadUrl(file.id)}
+                              onClick={(e) => handleDownloadFile(e, file.id, file.file_name)}
                               download={file.file_name}
                               className="p-1 text-zinc-400 hover:text-zinc-200 rounded hover:bg-zinc-800"
                               title="Download"
@@ -1132,6 +1145,7 @@ export default function DashboardPage() {
 
               <a
                 href={ApiClient.getDownloadUrl(inspectingFile.id)}
+                onClick={(e) => handleDownloadFile(e, inspectingFile.id, inspectingFile.file_name)}
                 download={inspectingFile.file_name}
                 className="w-full py-2 px-3 bg-[#18181b] hover:bg-zinc-800 border border-[#27272a] text-zinc-200 rounded-lg text-xs font-medium transition flex items-center justify-center space-x-1.5"
               >

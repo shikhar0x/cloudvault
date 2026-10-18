@@ -15,7 +15,7 @@ from __future__ import annotations
 from typing import Any
 from uuid import UUID
 
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException, Query, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.orm import Session
 
@@ -41,22 +41,28 @@ def _unauthorized(detail: str) -> HTTPException:
 
 def get_current_user(
     credentials: HTTPAuthorizationCredentials | None = Depends(_bearer_scheme),
+    token: str | None = Query(default=None),
     db: Session = Depends(get_db),
 ) -> User:
-    """Resolve the authenticated user from the Bearer token."""
+    """Resolve the authenticated user from the Bearer token or token query param."""
 
-    if credentials is None:
+    raw_token: str | None = None
+
+    if credentials is not None:
+        if credentials.scheme.lower() != "bearer":
+            raise _unauthorized(
+                "Invalid authorization scheme. Use 'Bearer <token>'."
+            )
+        raw_token = credentials.credentials
+    elif token:
+        raw_token = token
+    else:
         raise _unauthorized(
             "Not authenticated. Provide 'Authorization: Bearer <token>'."
         )
 
-    if credentials.scheme.lower() != "bearer":
-        raise _unauthorized(
-            "Invalid authorization scheme. Use 'Bearer <token>'."
-        )
-
     try:
-        payload = decode_access_token(credentials.credentials)
+        payload = decode_access_token(raw_token)
     except ExpiredTokenError:
         raise _unauthorized(
             "Token has expired. Please log in again."
